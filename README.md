@@ -1,4 +1,29 @@
-### Raspberry
-所谓的Raspberry其实就是牛奶泡，比blueberry好吃
+# 031802504-031802506
 
-raspberry is unbelievable!!!
+## Project setup
+```
+npm install
+```
+
+### Compiles and hot-reloads for development
+```
+npm run serve
+```
+
+### Compiles and minifies for production
+```
+npm run build
+```
+
+### Run your unit tests
+```
+npm run test:unit
+```
+
+### Lints and fixes files
+```
+npm run lint
+```
+
+### Customize configuration
+See [Configuration Reference](https://cli.vuejs.org/config/).
