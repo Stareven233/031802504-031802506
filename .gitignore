@@ -2,6 +2,7 @@
 node_modules
 /dist
 /tests
+*.noe
 
 
 # local env files
