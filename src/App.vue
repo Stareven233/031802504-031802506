@@ -13,8 +13,6 @@
 
     <el-tree class="tree"  :data="treeData" :props="defaultProps" @node-click="handleNodeClick"></el-tree>
     <!-- 添加属性default-expand-all 默认展开所有节点 -->
-
-    <span>{{testText}}</span>
   </div>
 </template>
 
@@ -25,7 +23,6 @@ export default {
   data () {
     return {
       textarea1: '',
-      testText: 'testText',
 
       regexp: {
         teacher: /^导师：(\S+)$/m,
@@ -33,14 +30,7 @@ export default {
         job: /\n\n(\S+)：(\S+)/mg
       },
 
-      oneData: {
-        label: '9级 1',
-        children: [{
-          label: '9级 1-1'
-        }]
-      },
-
-      treeData: [{
+      treeData0: [{
         label: '一级 1',
         children: [{
           label: '二级 1-1',
@@ -76,6 +66,8 @@ export default {
         }]
       }],
 
+      treeData: [],
+
       defaultProps: {
         children: 'children',
         label: 'label'
@@ -87,7 +79,7 @@ export default {
     handleNodeClick (data) {
       console.log(data)
     },
-    generateTree (e) {
+    generateTree () {
       if (!this.textarea1) {
         return false
       }
@@ -107,21 +99,31 @@ export default {
           const edu = {}
           edu.label = tmp[2] // 三级，学历
           edu.children = []
-          for (const n of tmp[3].split('、')) {
-            edu.children.push({ label: n }) // 四级，姓名
+          for (const name of tmp[3].split('、')) {
+            edu.children.push({ label: name }) // 四级，姓名
           }
           grade.children.push(edu)
-          teacher.children.push(grade)
+          this.mergerTree(teacher.children, grade)
         }
 
         console.log(Array.from(s.matchAll(this.regexp.job)))
 
-        this.treeData.push(teacher)
+        this.mergerTree(this.treeData, teacher)
       }
-
-      this.testText = this.textarea1
       this.textarea1 = ''
-      // this.treeData.push(this.oneData)
+    },
+    mergerTree (arr, obj) {
+      // arr每个元素都与obj同类，都是{label: xx, children: [{}, ]}的嵌套对像
+      // 若其中存在一个元素其label属性与obj的label相同则执行合并，否则obj推入arr中
+      const tmp = arr.find(item => item.label === obj.label)
+      if (tmp === undefined) {
+        arr.push(obj)
+        return
+      }
+      for (const c of obj.children || []) {
+        this.mergerTree(tmp.children, c)
+      }
+      // 替换策略：不同label直接push，否则递归合并children；最终由于学生姓名处无children属性只比较label将脱离递归
     }
   }
 }
