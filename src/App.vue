@@ -3,7 +3,7 @@
     <el-input
       class="input-area"
       type="textarea"
-      :autosize="{ minRows: 4, maxRows: 10}"
+      :autosize="{ minRows: 4, maxRows: 12 }"
       resize="none"
       clearable
       placeholder="请输入内容"
@@ -26,6 +26,12 @@ export default {
     return {
       textarea1: '',
       testText: 'testText',
+
+      regexp: {
+        teacher: /^导师：(\S+)$/m,
+        stu: /^(\d+级)(本科|硕士|博士)生：(\S+)/mg,
+        job: /\n\n(\S+)：(\S+)/mg
+      },
 
       oneData: {
         label: '9级 1',
@@ -69,6 +75,7 @@ export default {
           }]
         }]
       }],
+
       defaultProps: {
         children: 'children',
         label: 'label'
@@ -84,9 +91,37 @@ export default {
       if (!this.textarea1) {
         return false
       }
+      for (const s of this.textarea1.split('\n\n\n')) {
+        const teacher = {}
+        let tmp = s.match(this.regexp.teacher)
+        if (tmp === null) {
+          return false
+        }
+        teacher.label = tmp[1] // 一级，导师
+
+        teacher.children = []
+        for (tmp of s.matchAll(this.regexp.stu)) {
+          const grade = {}
+          grade.label = tmp[1] // 二级，年份，todo 重复的应覆盖
+          grade.children = []
+          const edu = {}
+          edu.label = tmp[2] // 三级，学历
+          edu.children = []
+          for (const n of tmp[3].split('、')) {
+            edu.children.push({ label: n }) // 四级，姓名
+          }
+          grade.children.push(edu)
+          teacher.children.push(grade)
+        }
+
+        console.log(Array.from(s.matchAll(this.regexp.job)))
+
+        this.treeData.push(teacher)
+      }
+
       this.testText = this.textarea1
       this.textarea1 = ''
-      this.treeData.push(this.oneData)
+      // this.treeData.push(this.oneData)
     }
   }
 }
