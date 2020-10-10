@@ -11,8 +11,15 @@
     </el-input>
      <el-button @click="generateTree">生成</el-button>
 
-    <el-tree class="tree"  :data="treeData" :props="defaultProps" @node-click="handleNodeClick"></el-tree>
+    <!-- <el-tree class="tree"  :data="treeData" :props="defaultProps" @node-click="handleNodeClick"></el-tree> -->
     <!-- 添加属性default-expand-all 默认展开所有节点 -->
+    <div v-for="tree in treeData" :key="tree.label">
+      <vue2-org-tree
+        :data="tree"
+        collapsable
+        @on-expand="onExpand"
+      />
+    </div>
   </div>
 </template>
 
@@ -31,18 +38,24 @@ export default {
       },
 
       treeData0: [{
+        id: 0,
         label: '一级 1',
         children: [{
+          id: 1,
           label: '二级 1-1',
           children: [{
+            id: 2,
             label: '三级 1-1-1'
           }]
         }]
       }, {
+        id: 5,
         label: '一级 2',
         children: [{
+          id: 4,
           label: '二级 2-1',
           children: [{
+            id: 3,
             label: '三级 2-1-1'
           }]
         }, {
@@ -76,9 +89,7 @@ export default {
     }
   },
   methods: {
-    handleNodeClick (data) {
-      console.log(data)
-    },
+    // 处理原始数据并生成树
     generateTree () {
       if (!this.textarea1) {
         return false
@@ -112,9 +123,9 @@ export default {
       }
       this.textarea1 = ''
     },
+    // arr每个元素都与obj同类，都是{label: xx, children: [{}, ]}的嵌套对像
+    // 若其中存在一个元素其label属性与obj的label相同则执行合并，否则obj推入arr中
     mergerTree (arr, obj) {
-      // arr每个元素都与obj同类，都是{label: xx, children: [{}, ]}的嵌套对像
-      // 若其中存在一个元素其label属性与obj的label相同则执行合并，否则obj推入arr中
       const tmp = arr.find(item => item.label === obj.label)
       if (tmp === undefined) {
         arr.push(obj)
@@ -124,6 +135,57 @@ export default {
         this.mergerTree(tmp.children, c)
       }
       // 替换策略：不同label直接push，否则递归合并children；最终由于学生姓名处无children属性只比较label将脱离递归
+    },
+
+    handleNodeClick (data) {
+      // console.log(data)
+    },
+    // 展开或闭合节点
+    onExpand (e, data) {
+      if ('expand' in data) {
+        data.expand = !data.expand
+        if (!data.expand && data.children) {
+          this.collapse(data.children)
+        }
+      // eslint-disable-next-line brace-style
+      }
+      else {
+        this.$set(data, 'expand', true)
+      }
+    },
+    // 递归处理该节点的子节点
+    collapse (arr) {
+      var _this = this
+      arr.forEach(function (child) {
+        if (child.expand) {
+          child.expand = false
+        }
+        child.children && _this.collapse(child.children)
+      })
+    },
+
+    // 整棵树的展开与闭合
+    expandChange () {
+      this.toggleExpand(this.data, this.expandAll)
+    },
+    // 展开闭合状态的切换
+    toggleExpand (data, val) {
+      var _this = this
+      if (Array.isArray(data)) {
+        data.forEach(function (item) {
+          _this.$set(item, 'expand', val)
+          if (item.children) {
+            _this.toggleExpand(item.children, val)
+          }
+        })
+      // eslint-disable-next-line brace-style
+      }
+      else {
+        this.$set(data, 'expand', val)
+        if (data.children) {
+          _this.toggleExpand(data.children, val)
+        }
+      }
     }
   }
 }
