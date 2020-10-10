@@ -49,7 +49,7 @@ export default {
       regexp: {
         teacher: /^导师：(\S+)$/m,
         stu: /^(\d+级)(本科|硕士|博士)生：(\S+)/mg,
-        job: /\n\n(\S+)：(\S+)/mg
+        tag: /\n\n(\S+)：(\S+)/mg
       },
 
       // 调试用数据
@@ -94,7 +94,6 @@ export default {
           }]
         }]
       }],
-
       treeData: [{
         label: '张三',
         children: [{
@@ -109,6 +108,8 @@ export default {
           }]
         }]
       }],
+      // 记录师生节点信息，{ name: {tag:"", | isTeacher:true, node:对应节点数据的引用} }
+      nodeData: {},
 
       defaultProps: {
         children: 'children',
@@ -149,7 +150,11 @@ export default {
           this.mergerTree(teacher.children, grade)
         }
 
-        console.log(Array.from(s.matchAll(this.regexp.job)))
+        for (tmp of s.matchAll(this.regexp.tag)) {
+          this.nodeData[tmp[1]] = this.nodeData[tmp[1]] || {}
+          this.nodeData[tmp[1]].tag = tmp[2]
+        }
+        // 记录每个学生信息，学生名为键，同名将被覆盖
 
         this.mergerTree(this.treeData, teacher)
       }
@@ -189,12 +194,13 @@ export default {
       if (leaf.parentElement.parentElement.className !== 'org-tree-node is-leaf') {
         return
       }
-      this.popContent = data.label
-      this.$refs.popover.doShow()
+      this.popContent = data.label in this.nodeData ? this.nodeData[data.label].tag : '暂无tag'
       const popNode = document.getElementById(this.$refs.popover.tooltipId)
       const pos = this.getAbsolutePos(leaf)
       popNode.style.left = pos.left + 'px'
       popNode.style.top = pos.top + leaf.getBoundingClientRect().height + 10 + 'px'
+      // 很坑，left与top必须用绝对坐标，而且popover show之前无法获取坐标等信息
+      this.$refs.popover.doShow()
     },
     closePopover () {
       this.$refs.popover.doClose()
