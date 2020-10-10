@@ -9,7 +9,7 @@
       placeholder="请输入内容"
       v-model="textarea1">
     </el-input>
-     <el-button @click="generateTree">生成</el-button>
+    <el-button @click="generateTree">生成</el-button>
 
     <!-- <el-tree class="tree"  :data="treeData" :props="defaultProps" @node-click="handleNodeClick"></el-tree> -->
     <!-- 添加属性default-expand-all 默认展开所有节点 -->
@@ -18,8 +18,19 @@
         :data="tree"
         collapsable
         @on-expand="onExpand"
+        @on-node-click="showPopover"
       />
     </div>
+
+     <el-popover
+        ref="popover"
+        placement="top-start"
+        title=""
+        width="160"
+        trigger="manual"
+        :content="popContent">
+    </el-popover>
+    <!-- <el-button v-popover:popover>focus 激活</el-button> -->
   </div>
 </template>
 
@@ -30,6 +41,10 @@ export default {
   data () {
     return {
       textarea1: '',
+      expandAll: true,
+
+      popShow: false,
+      popContent: '',
 
       regexp: {
         teacher: /^导师：(\S+)$/m,
@@ -37,6 +52,7 @@ export default {
         job: /\n\n(\S+)：(\S+)/mg
       },
 
+      // 调试用数据
       treeData0: [{
         id: 0,
         label: '一级 1',
@@ -79,7 +95,20 @@ export default {
         }]
       }],
 
-      treeData: [],
+      treeData: [{
+        label: '张三',
+        children: [{
+          label: '2021级',
+          children: [{
+            label: '本科',
+            children: [{
+              label: 'sb'
+            }, {
+              label: '哈批'
+            }]
+          }]
+        }]
+      }],
 
       defaultProps: {
         children: 'children',
@@ -87,6 +116,9 @@ export default {
         // 定义上述要生成节点的对象列表中所采用的属性名
       }
     }
+  },
+  mounted () {
+    document.addEventListener('click', this.closePopover)
   },
   methods: {
     // 处理原始数据并生成树
@@ -137,8 +169,35 @@ export default {
       // 替换策略：不同label直接push，否则递归合并children；最终由于学生姓名处无children属性只比较label将脱离递归
     },
 
-    handleNodeClick (data) {
-      // console.log(data)
+    // 递归获取元素相对浏览器的绝对坐标
+    getAbsolutePos (element) {
+      var pos = { top: 0, left: 0 }
+      while (element.offsetParent) {
+        pos.top += element.offsetTop
+        pos.left += element.offsetLeft
+        element = element.offsetParent
+      }
+      return pos
+    },
+
+    showPopover (e, data) {
+      // console.log(e, data)
+      // e为点击事件，data为被点击的节点数据
+      e.stopPropagation()
+      // 避免同时触发document上的close
+      const leaf = e.target
+      if (leaf.parentElement.parentElement.className !== 'org-tree-node is-leaf') {
+        return
+      }
+      this.popContent = data.label
+      this.$refs.popover.doShow()
+      const popNode = document.getElementById(this.$refs.popover.tooltipId)
+      const pos = this.getAbsolutePos(leaf)
+      popNode.style.left = pos.left + 'px'
+      popNode.style.top = pos.top + leaf.getBoundingClientRect().height + 10 + 'px'
+    },
+    closePopover () {
+      this.$refs.popover.doClose()
     },
     // 展开或闭合节点
     onExpand (e, data) {
@@ -166,7 +225,7 @@ export default {
 
     // 整棵树的展开与闭合
     expandChange () {
-      this.toggleExpand(this.data, this.expandAll)
+      this.toggleExpand(this.treeData, this.expandAll)
     },
     // 展开闭合状态的切换
     toggleExpand (data, val) {
@@ -198,7 +257,7 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin: 60px auto 0;
+  margin: 60px auto 200px;
   width: 800px;
 
   .tree {
