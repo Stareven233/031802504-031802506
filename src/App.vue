@@ -39,13 +39,13 @@
 <script>
 export default {
   name: 'App',
+
   // ↓使用return包裹后数据中变量只在当前组件中生效，不会影响其他组件，防止数据污染
   data () {
     return {
       textarea1: '',
       expandAll: true,
 
-      popShow: false,
       popContent: '',
 
       regexp: {
@@ -55,53 +55,9 @@ export default {
       },
 
       // 调试用数据
-      treeData0: [{
-        id: 0,
-        label: '一级 1',
-        children: [{
-          id: 1,
-          label: '二级 1-1',
-          children: [{
-            id: 2,
-            label: '三级 1-1-1'
-          }]
-        }]
-      }, {
-        id: 5,
-        label: '一级 2',
-        children: [{
-          id: 4,
-          label: '二级 2-1',
-          children: [{
-            id: 3,
-            label: '三级 2-1-1'
-          }]
-        }, {
-          label: '二级 2-2',
-          children: [{
-            id: 6,
-            label: '三级 2-2-1'
-          }]
-        }]
-      }, {
-        label: '一级 3',
-        children: [{
-          id: 7,
-          label: '二级 3-1',
-          children: [{
-            id: 8,
-            label: '三级 3-1-1'
-          }]
-        }, {
-          label: '二级 3-2',
-          children: [{
-            id: 9,
-            label: '三级 3-2-1'
-          }]
-        }]
-      }],
+      treeData0: [{ label: '张三', tag: '导师', isTeacher: true, children: [{ label: '2016级', children: [{ label: '硕士', children: [{ label: '刘一', tag: '什么都不会', isTeacher: false, expand: true }, { label: '李二', isTeacher: false, expand: true }], expand: true }], expand: true }, { label: '2022级', children: [{ label: '本科', children: [{ label: '刘六', tag: '字节跳动、京东云', isTeacher: false, expand: true }], expand: true }], expand: true }], expand: true }],
       treeData: [],
-      // 记录师生节点信息，用于树的合并，{ name: { isTeacher:true, node:对应节点数据的引用 } }
+      // 记录师生节点信息，用于树的合并，结构应与treeData一致
       nodeData: {},
 
       defaultProps: {
@@ -217,6 +173,9 @@ export default {
       this.popContent = data.tag || '暂无tag'
       const popNode = document.getElementById(this.$refs.popover.tooltipId)
       const pos = this.getAbsolutePos(node)
+      if (popNode === null) {
+        return
+      }
       popNode.style.left = pos.left + 'px'
       popNode.style.top = pos.top + node.getBoundingClientRect().height + 10 + 'px'
       // 很坑，left与top必须用绝对坐标，而且popover show之前无法获取坐标等信息
