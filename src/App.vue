@@ -18,6 +18,7 @@
       <vue2-org-tree
         :data="tree"
         collapsable
+        :labelClassName="classOfPopover"
         @on-expand="onExpand"
         @on-node-click="showPopover"
       />
@@ -99,30 +100,7 @@ export default {
           }]
         }]
       }],
-      treeData: [{
-        id: 1,
-        label: '张三',
-        isTeacher: true,
-        children: [{
-          id: 2,
-          label: '2021级',
-          isTeacher: false,
-          children: [{
-            id: 3,
-            label: '本科',
-            isTeacher: false,
-            children: [{
-              id: 4,
-              label: 'sb',
-              isTeacher: false
-            }, {
-              id: 5,
-              label: '哈批',
-              isTeacher: false
-            }]
-          }]
-        }]
-      }],
+      treeData: [],
       // 记录师生节点信息，用于树的合并，{ name: { isTeacher:true, node:对应节点数据的引用 } }
       nodeData: {},
 
@@ -174,7 +152,7 @@ export default {
             const stu = { label: name, tag: tags[name], isTeacher: false }
             edu.children.push(stu) // 四级，姓名
 
-            console.log(this.nodeData)
+            // console.log(this.nodeData)
 
             if (this.nodeData[name] && this.nodeData[name].isTeacher) {
               // 在此处合并导师节点到新来的叶节点上，nodeData的isTeacher仍为true
@@ -231,15 +209,16 @@ export default {
       // e为点击事件，data为被点击的节点数据
       e.stopPropagation()
       // 避免同时触发document上的close
-      const leaf = e.target
-      if (leaf.parentElement.parentElement.className !== 'org-tree-node is-leaf') {
+      const node = e.target
+      if (node.className.indexOf('tree-teacher') + node.className.indexOf('tree-student') === -2) {
+        // 两个都找不到时返回值(每个为-1)加起来为-2
         return
       }
       this.popContent = data.tag || '暂无tag'
       const popNode = document.getElementById(this.$refs.popover.tooltipId)
-      const pos = this.getAbsolutePos(leaf)
+      const pos = this.getAbsolutePos(node)
       popNode.style.left = pos.left + 'px'
-      popNode.style.top = pos.top + leaf.getBoundingClientRect().height + 10 + 'px'
+      popNode.style.top = pos.top + node.getBoundingClientRect().height + 10 + 'px'
       // 很坑，left与top必须用绝对坐标，而且popover show之前无法获取坐标等信息
       this.$refs.popover.doShow()
     },
@@ -247,6 +226,17 @@ export default {
       if (typeof this.$refs.popover === 'object') {
         this.$refs.popover.doClose()
       }
+    },
+    classOfPopover (node) {
+      // console.log('from classsOfPopover: ', node)
+      if (node.isTeacher) {
+        return 'tree-teacher'
+      // eslint-disable-next-line brace-style
+      }
+      else if (node.isTeacher === false) {
+        return 'tree-student'
+      }
+      // node.isTeacher === undefined 说明为中间的年级学历节点
     },
 
     // 展开或闭合节点
@@ -309,5 +299,12 @@ export default {
   color: #2c3e50;
   margin: 60px auto 200px;
   width: 800px;
+
+  .org-tree-container {
+    .tree-teacher {
+      color: #ffffff;
+      background-color: #ffc082;
+    }
+  }
 }
 </style>
