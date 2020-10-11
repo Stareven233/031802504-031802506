@@ -14,6 +14,7 @@
     <!-- <el-tree class="tree"  :data="treeData" :props="defaultProps" @node-click="handleNodeClick"></el-tree> -->
     <!-- 添加属性default-expand-all 默认展开所有节点 -->
     <div v-for="tree in treeData" :key="tree.label">
+      <!-- 至少在同棵树里面，label应当唯一，除非一个人在一棵树中同时出现在导师与学生的位置 -->
       <vue2-org-tree
         :data="tree"
         collapsable
@@ -77,38 +78,52 @@ export default {
         }, {
           label: '二级 2-2',
           children: [{
+            id: 6,
             label: '三级 2-2-1'
           }]
         }]
       }, {
         label: '一级 3',
         children: [{
+          id: 7,
           label: '二级 3-1',
           children: [{
+            id: 8,
             label: '三级 3-1-1'
           }]
         }, {
           label: '二级 3-2',
           children: [{
+            id: 9,
             label: '三级 3-2-1'
           }]
         }]
       }],
       treeData: [{
+        id: 1,
         label: '张三',
+        isTeacher: true,
         children: [{
+          id: 2,
           label: '2021级',
+          isTeacher: false,
           children: [{
+            id: 3,
             label: '本科',
+            isTeacher: false,
             children: [{
-              label: 'sb'
+              id: 4,
+              label: 'sb',
+              isTeacher: false
             }, {
-              label: '哈批'
+              id: 5,
+              label: '哈批',
+              isTeacher: false
             }]
           }]
         }]
       }],
-      // 记录师生节点信息，{ name: {tag:"", | isTeacher:true, node:对应节点数据的引用} }
+      // 记录师生节点信息，用于树的合并，{ name: { isTeacher:true, node:对应节点数据的引用 } }
       nodeData: {},
 
       defaultProps: {
@@ -129,36 +144,62 @@ export default {
       }
       for (const s of this.textarea1.split('\n\n\n')) {
         const teacher = {}
-        let tmp = s.match(this.regexp.teacher)
-        if (tmp === null) {
+        const t = s.match(this.regexp.teacher)
+        if (t === null) {
           return false
         }
-        teacher.label = tmp[1] // 一级，导师
+
+        teacher.label = t[1] // 一级，导师
+        teacher.tag = '导师'
+        teacher.isTeacher = true
+        // 其他节点没有isTeacher也可，调用时返回undefined
+        this.nodeData[t[1]] = { isTeacher: true, node: teacher }
+
+        const tags = {}
+        // 为了下面处理学生节点时能写入tag，必须先行处理
+        for (const t of s.matchAll(this.regexp.tag)) {
+          tags[t[1]] = t[2] // t: name, tag
+        }
+        // 记录每个学生信息，学生名为键，同名将被覆盖
 
         teacher.children = []
-        for (tmp of s.matchAll(this.regexp.stu)) {
+        for (const stu of s.matchAll(this.regexp.stu)) {
           const grade = {}
-          grade.label = tmp[1] // 二级，年份，todo 重复的应覆盖
+          grade.label = stu[1] // 二级，年份
           grade.children = []
           const edu = {}
-          edu.label = tmp[2] // 三级，学历
+          edu.label = stu[2] // 三级，学历
           edu.children = []
-          for (const name of tmp[3].split('、')) {
-            edu.children.push({ label: name }) // 四级，姓名
+          for (const name of stu[3].split('、')) {
+            const stu = { label: name, tag: tags[name], isTeacher: false }
+            edu.children.push(stu) // 四级，姓名
+
+            console.log(this.nodeData)
+
+            if (this.nodeData[name] && this.nodeData[name].isTeacher) {
+              // 在此处合并导师节点到新来的叶节点上，nodeData的isTeacher仍为true
+              // 恐怕第二次出现在叶节点要求合并时会出问题，这时该节点相当于同属两个根节点
+              stu.children = this.nodeData[name].node.children
+              stu.isTeacher = true
+              this.nodeData[name].node = { isTeacher: true, node: stu }
+
+              const idx = this.treeData.findIndex(item => item.label === name)
+              this.treeData.splice(idx, 1)
+              // 合并完删除原来的树
+              continue
+            }
+            this.nodeData[name] = { isTeacher: false, node: stu }
+            // 若一个人同为两棵树的叶节点(若其中一个为根节点则会合并)，则nodeData只会保存一份引用
+            // 影响在于没有实现两棵树叶节点关联，而且之后若这个人为导师只会接到最新的叶节点上
           }
           grade.children.push(edu)
           this.mergerTree(teacher.children, grade)
         }
-
-        for (tmp of s.matchAll(this.regexp.tag)) {
-          this.nodeData[tmp[1]] = this.nodeData[tmp[1]] || {}
-          this.nodeData[tmp[1]].tag = tmp[2]
-        }
-        // 记录每个学生信息，学生名为键，同名将被覆盖
-
         this.mergerTree(this.treeData, teacher)
       }
       this.textarea1 = ''
+      this.expandChange()
+      // 默认展开这棵树
     },
     // arr每个元素都与obj同类，都是{label: xx, children: [{}, ]}的嵌套对像
     // 若其中存在一个元素其label属性与obj的label相同则执行合并，否则obj推入arr中
@@ -194,7 +235,7 @@ export default {
       if (leaf.parentElement.parentElement.className !== 'org-tree-node is-leaf') {
         return
       }
-      this.popContent = data.label in this.nodeData ? this.nodeData[data.label].tag : '暂无tag'
+      this.popContent = data.tag || '暂无tag'
       const popNode = document.getElementById(this.$refs.popover.tooltipId)
       const pos = this.getAbsolutePos(leaf)
       popNode.style.left = pos.left + 'px'
@@ -203,8 +244,11 @@ export default {
       this.$refs.popover.doShow()
     },
     closePopover () {
-      this.$refs.popover.doClose()
+      if (typeof this.$refs.popover === 'object') {
+        this.$refs.popover.doClose()
+      }
     },
+
     // 展开或闭合节点
     onExpand (e, data) {
       if ('expand' in data) {
@@ -265,9 +309,5 @@ export default {
   color: #2c3e50;
   margin: 60px auto 200px;
   width: 800px;
-
-  .tree {
-    margin: 20px 0;
-  }
 }
 </style>
