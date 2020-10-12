@@ -1,5 +1,9 @@
 # 031802504-031802506
 
+## 连接
+- [作业发布页](https://edu.cnblogs.com/campus/fzu/SE2020/homework/11277)
+- [对应博客园随笔](https://www.cnblogs.com/Stareven233/p/13797157.html)
+
 ## 任务
 ### 输入:
 学术家族树以文本形式输入，web页面需要提供一个文本框；考虑学术家族树的文本格式是这样的：
@@ -20,28 +24,37 @@
 ### 输出:
 文本的呈现方式没有强制要求，可以自定义为普通格式或XML格式；树的节点，鼠标点击后是可以缩放的。同时，支持呈现多棵树并存、两棵关联树共存等形式。点击某个叶节点，呈现该节点的技能及经历。
 
-## 安装
-```
-npm install
-```
+## 使用
 
-### 编译&运行
-```
-npm run serve
-```
+### npm
+- [安装nodejs](https://nodejs.org/)  
+注：本仓库使用的是v14.13.1
 
-### 编译&运行(生产环境)
-```
-npm run build
-```
+- 安装vue  
+`npm install -g @vue/cli`
 
-### 运行单元测试
-```
-npm run test:unit
-```
+- clone该仓库  
+`$ git clone https://github.com/Stareven233/031802504-031802506`  
 
-### Lints
-```
-npm run lint
-```
+- 安装依赖  
+`cd 031802504-031802506`  
+`npm install`  
+
+- 编译&运行  
+`npm run serve`  
+
+- 编译&运行(生产环境)  
+`npm run build`
+
+### dist
+- clone该仓库  
+`$ git clone https://github.com/Stareven233/031802504-031802506`  
+
+- 服务器打开`031802504-031802506/dist/index.html`  
+使用vs code安装live server插件，点击右下方Go live  
+或nginx、apache  
+或node、python等语言的开发用服务器  
+
+## 运行单元测试  
+`npm run test`
 
