@@ -9,6 +9,25 @@ Vue.use(ElementUI)
 Vue.use(Vue2OrgTree)
 Vue.config.productionTip = false
 
+Vue.directive('drag', {
+  bind: function (el, binding, vnode) {
+    el.onmousedown = (e) => {
+      const x = e.clientX - el.offsetLeft
+      const y = e.clientY - el.offsetTop
+
+      document.onmousemove = (e) => {
+        el.style.left = e.clientX - x + 'px'
+        el.style.top = e.clientY - y + 'px'
+      }
+
+      document.onmouseup = () => {
+        document.onmousemove = null
+        document.onmouseup = null
+      }
+    }
+  }
+})
+
 new Vue({
   render: h => h(App)
 }).$mount('#app')

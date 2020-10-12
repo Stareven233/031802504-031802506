@@ -13,7 +13,7 @@
 
     <!-- <el-tree class="tree"  :data="treeData" :props="defaultProps" @node-click="handleNodeClick"></el-tree> -->
     <!-- 添加属性default-expand-all 默认展开所有节点 -->
-    <div v-for="tree in treeData" :key="tree.label">
+    <div class="tree-graph" v-drag v-for="tree in treeData" :key="tree.label">
       <!-- 至少在同棵树里面，label应当唯一，除非一个人在一棵树中同时出现在导师与学生的位置 -->
       <vue2-org-tree
         :data="tree"
@@ -259,7 +259,18 @@ export default {
   margin: 60px auto 200px;
   width: 800px;
 
+  .tree-graph {
+    user-select: none;
+    position: absolute;
+    // background-color: rgba(255, 155, 155, 0);
+    // 还没z-index好用
+  }
+
   .org-tree-container {
+    .org-tree-node-label {
+      z-index: 100;
+      background-color: #ffffff;
+    }
     .tree-teacher {
       color: #ffffff;
       background-color: #ffc082;
