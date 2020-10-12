@@ -7,6 +7,25 @@ import Vue2OrgTree from 'vue2-org-tree'
 Vue.use(ElementUI)
 Vue.use(Vue2OrgTree)
 
+Vue.directive('drag', {
+  bind: function (el, binding, vnode) {
+    el.onmousedown = (e) => {
+      const x = e.clientX - el.offsetLeft
+      const y = e.clientY - el.offsetTop
+
+      document.onmousemove = (e) => {
+        el.style.left = e.clientX - x + 'px'
+        el.style.top = e.clientY - y + 'px'
+      }
+
+      document.onmouseup = () => {
+        document.onmousemove = null
+        document.onmouseup = null
+      }
+    }
+  }
+})
+
 // describe: 用于创建一个测试集，也可以在外面直接用it
 // 与it一样，第一个参数为测试集描述，第二个是测试代码
 describe('假定生成正确的页面展示', () => {
@@ -22,12 +41,15 @@ describe('假定生成正确的页面展示', () => {
     }
   })
 
+  const button = wrapper.findAllComponents({ name: 'el-button' }).at(0)
+  button.trigger('click')
   it('验证输入框', () => {
     expect(wrapper.get('.el-textarea__inner'))
   })
 
   it('验证生成按钮', () => {
-    const button = wrapper.findComponent({ name: 'el-button' })
+    const button = wrapper.findAllComponents({ name: 'el-button' }).at(2)
+    // at(1)的是清除数据按钮
     expect(button.text()).toBe('生成')
   })
 

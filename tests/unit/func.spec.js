@@ -7,6 +7,25 @@ import Vue2OrgTree from 'vue2-org-tree'
 Vue.use(ElementUI)
 Vue.use(Vue2OrgTree)
 
+Vue.directive('drag', {
+  bind: function (el, binding, vnode) {
+    el.onmousedown = (e) => {
+      const x = e.clientX - el.offsetLeft
+      const y = e.clientY - el.offsetTop
+
+      document.onmousemove = (e) => {
+        el.style.left = e.clientX - x + 'px'
+        el.style.top = e.clientY - y + 'px'
+      }
+
+      document.onmouseup = () => {
+        document.onmousemove = null
+        document.onmouseup = null
+      }
+    }
+  }
+})
+
 describe('测试生成树及其他函数', () => {
   const wrapper = mount(App, {
     data () {
@@ -37,8 +56,14 @@ describe('测试生成树及其他函数', () => {
 刘六：字节跳动、京东云
   `
   // 就因为输入字符串每行前面多了空格就一直测试不过...
-  const button = wrapper.findComponent({ name: 'el-button' })
-  button.trigger('click')
+  wrapper.findAllComponents({ name: 'el-button' }).at(0).trigger('click') // 先打开侧边输入框
+
+  it('generateTree(expand)', () => {
+    const button = wrapper.findAllComponents({ name: 'el-button' }).at(2)
+    button.trigger('click')
+    wrapper.vm.expandChange()
+    // 先生成，再展开才有数据，而且还不能跟侧边输入框打开放一起
+  })
 
   it('generateTree(treeData)', () => {
     const tData = [{ label: '张三', tag: '导师', isTeacher: true, children: [{ label: '2016级', children: [{ label: '硕士', children: [{ label: '刘一', tag: '什么都不会', isTeacher: false, expand: true }], expand: true }], expand: true }], expand: true }, { label: '张二', tag: '导师', isTeacher: true, children: [{ label: '2022级', children: [{ label: '本科', children: [{ label: '刘六', tag: '字节跳动、京东云', isTeacher: false, expand: true }], expand: true }], expand: true }], expand: true }]

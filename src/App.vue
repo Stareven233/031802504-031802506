@@ -70,7 +70,7 @@
     </el-popover>
     <!-- <el-button v-popover:popover>focus 激活</el-button> -->
 
-    <el-backtop target=".page-component__scroll .el-scrollbar__wrap"></el-backtop>
+    <!-- <el-backtop target=".page-component__scroll .el-scrollbar__wrap"></el-backtop> -->
   </el-container>
 </template>
 
@@ -173,6 +173,7 @@ export default {
       }
       this.textarea1 = ''
       this.drawer = false
+      // this.expandChange()
       // 默认展开这棵树
     },
     // arr每个元素都与obj同类，都是{label: xx, children: [{}, ]}的嵌套对像

@@ -3,6 +3,7 @@ node_modules
 /dist
 /coverage
 *.noe
+*.jpg
 
 
 # local env files
