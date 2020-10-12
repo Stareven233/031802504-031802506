@@ -26,6 +26,11 @@
 
 ## 使用
 
+### github-pages
+- 访问[https://stareven233.github.io/031802504-031802506/](https://stareven233.github.io/031802504-031802506/)即可
+- 若打不开很有可能需要修改dns为233.5.5.5或233.6.6.6
+- 或者在hosts文件中添加 185.199.110.153 stareven233.github.io _未验证_
+
 ### npm
 - [安装nodejs](https://nodejs.org/)  
 注：本仓库使用的是v14.13.1
@@ -43,12 +48,11 @@
 - 编译&运行  
 `npm run serve`  
 
+### dist
+- npm方式执行完npm install后：
+
 - 编译&运行(生产环境)  
 `npm run build`
-
-### dist
-- clone该仓库  
-`$ git clone https://github.com/Stareven233/031802504-031802506`  
 
 - 服务器打开`031802504-031802506/dist/index.html`  
 使用vs code安装live server插件，点击右下方Go live  
@@ -57,4 +61,3 @@
 
 ## 运行单元测试  
 `npm run test`
-
