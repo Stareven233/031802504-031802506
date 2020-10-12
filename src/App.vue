@@ -2,7 +2,9 @@
   <el-container id="app">
     <el-header>
       <el-row class="option-row" :gutter="20">
-        <el-col class="option-col" :span="6"><el-button class="open-drawer" @click="drawer=true" type="primary">输入数据</el-button></el-col>
+        <el-col class="option-col" :span="6"><el-button class="option-btn" @click="drawer=true" type="primary">输入数据</el-button></el-col>
+
+        <el-col class="option-col" :span="6"><el-button class="option-btn" @click="treeData=[]" type="primary">清除数据</el-button></el-col>
 
         <el-col class="option-col" :span="6">
           <label>
@@ -298,6 +300,7 @@ export default {
   width: 800px;
 
   .el-header {
+    z-index: 10;
 
     .option-row {
       display:flex;
@@ -306,7 +309,7 @@ export default {
       }
     }
 
-    .open-drawer {
+    .option-btn {
       background-color: #ffffff;
       color: #232323;
       border-color: #687388;
@@ -324,6 +327,8 @@ export default {
   }
 
   .tree-graph {
+    left: 50%;
+    top: 20%;
     user-select: none;
     position: absolute;
     // background-color: rgba(255, 155, 155, 0);
