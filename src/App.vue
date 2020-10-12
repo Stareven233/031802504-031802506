@@ -1,15 +1,48 @@
 <template>
-  <div id="app">
-    <el-input
-      class="input-area"
-      type="textarea"
-      :autosize="{ minRows: 4, maxRows: 12 }"
-      resize="none"
-      clearable
-      placeholder="请输入内容"
-      v-model="textarea1">
-    </el-input>
-    <el-button @click="generateTree">生成</el-button>
+  <el-container id="app">
+    <el-header>
+      <el-row class="option-row" :gutter="20">
+        <el-col class="option-col" :span="6"><el-button class="open-drawer" @click="drawer=true" type="primary">输入数据</el-button></el-col>
+
+        <el-col class="option-col" :span="6">
+          <label>
+            <input
+                type="checkbox"
+                v-model="horizontal"
+              > 是否横向展示
+          </label>
+        </el-col>
+
+          <el-col class="option-col" :span="6">
+            <label>
+              <input
+                type="checkbox"
+                v-model="expandAll"
+                @change="expandChange"
+              > 是否展开所有
+            </label>
+          </el-col>
+
+      </el-row>
+    </el-header>
+
+    <el-drawer
+      title="我是标题"
+      :visible.sync="drawer"
+      :with-header="false">
+
+      <el-input
+        class="input-area"
+        type="textarea"
+        :autosize="{ minRows: 20, maxRows: 27 }"
+        resize="none"
+        clearable
+        placeholder="请输入内容"
+        v-model="textarea1">
+      </el-input>
+      <el-button class="input-button" @click="generateTree">生成</el-button>
+
+    </el-drawer>
 
     <!-- <el-tree class="tree"  :data="treeData" :props="defaultProps" @node-click="handleNodeClick"></el-tree> -->
     <!-- 添加属性default-expand-all 默认展开所有节点 -->
@@ -19,6 +52,7 @@
         :data="tree"
         collapsable
         :labelClassName="classOfPopover"
+        :horizontal="horizontal"
         @on-expand="onExpand"
         @on-node-click="showPopover"
       />
@@ -33,7 +67,9 @@
         :content="popContent">
     </el-popover>
     <!-- <el-button v-popover:popover>focus 激活</el-button> -->
-  </div>
+
+    <el-backtop target=".page-component__scroll .el-scrollbar__wrap"></el-backtop>
+  </el-container>
 </template>
 
 <script>
@@ -44,7 +80,9 @@ export default {
   data () {
     return {
       textarea1: '',
-      expandAll: true,
+      horizontal: false,
+      expandAll: false,
+      drawer: false,
 
       popContent: '',
 
@@ -132,7 +170,7 @@ export default {
         this.mergerTree(this.treeData, teacher)
       }
       this.textarea1 = ''
-      this.expandChange()
+      this.drawer = false
       // 默认展开这棵树
     },
     // arr每个元素都与obj同类，都是{label: xx, children: [{}, ]}的嵌套对像
@@ -259,6 +297,32 @@ export default {
   margin: 60px auto 200px;
   width: 800px;
 
+  .el-header {
+
+    .option-row {
+      display:flex;
+      .option-col {
+        align-self:center;
+      }
+    }
+
+    .open-drawer {
+      background-color: #ffffff;
+      color: #232323;
+      border-color: #687388;
+    }
+  }
+
+  .input-area {
+    width: 85%;
+    margin: 30px auto 50px;
+    display: block;
+
+    .el-textarea__inner {
+      margin: 0;
+    }
+  }
+
   .tree-graph {
     user-select: none;
     position: absolute;
@@ -268,12 +332,16 @@ export default {
 
   .org-tree-container {
     .org-tree-node-label {
-      z-index: 100;
+      z-index: 20;
       background-color: #ffffff;
     }
     .tree-teacher {
+      cursor: pointer;
       color: #ffffff;
       background-color: #ffc082;
+    }
+    .tree-student {
+      cursor: pointer;
     }
   }
 }
