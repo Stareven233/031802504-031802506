@@ -25,6 +25,7 @@ Vue.directive('drag', {
     }
   }
 })
+// 全局反而比写组件里更麻烦，每个测试文件里都必须重新定义
 
 describe('测试生成树及其他函数', () => {
   const wrapper = mount(App, {
@@ -62,7 +63,7 @@ describe('测试生成树及其他函数', () => {
     const button = wrapper.findAllComponents({ name: 'el-button' }).at(2)
     button.trigger('click')
     wrapper.vm.expandChange()
-    // 先生成，再展开才有数据，而且还不能跟侧边输入框打开放一起
+    // 先生成，再展开才有数据，而且还不能跟上方的侧边输入框打开放一起
   })
 
   it('generateTree(treeData)', () => {

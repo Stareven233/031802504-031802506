@@ -29,7 +29,7 @@
     </el-header>
 
     <el-drawer
-      title="我是标题"
+      title=""
       :visible.sync="drawer"
       :with-header="false">
 
@@ -68,9 +68,9 @@
         trigger="manual"
         :content="popContent">
     </el-popover>
-    <!-- <el-button v-popover:popover>focus 激活</el-button> -->
 
     <!-- <el-backtop target=".page-component__scroll .el-scrollbar__wrap"></el-backtop> -->
+    <!-- 似乎无效的滚动组件 -->
   </el-container>
 </template>
 
@@ -167,25 +167,25 @@ export default {
             // 影响在于没有实现两棵树叶节点关联，而且之后若这个人为导师只会接到最新的叶节点上
           }
           grade.children.push(edu)
-          this.mergerTree(teacher.children, grade)
+          this.mergeTree(teacher.children, grade)
         }
-        this.mergerTree(this.treeData, teacher)
+        this.mergeTree(this.treeData, teacher)
       }
       this.textarea1 = ''
       this.drawer = false
       // this.expandChange()
       // 默认展开这棵树
     },
-    // arr每个元素都与obj同类，都是{label: xx, children: [{}, ]}的嵌套对像
+    // arr每个元素都与obj同类，都是{label: xx, children: [{}, ]}的嵌套对象
     // 若其中存在一个元素其label属性与obj的label相同则执行合并，否则obj推入arr中
-    mergerTree (arr, obj) {
+    mergeTree (arr, obj) {
       const tmp = arr.find(item => item.label === obj.label)
       if (tmp === undefined) {
         arr.push(obj)
         return
       }
       for (const c of obj.children || []) {
-        this.mergerTree(tmp.children, c)
+        this.mergeTree(tmp.children, c)
       }
       // 替换策略：不同label直接push，否则递归合并children；最终由于学生姓名处无children属性只比较label将脱离递归
     },
